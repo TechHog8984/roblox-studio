@@ -1,0 +1,1598 @@
+<roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4">
+	<External>null</External>
+	<External>nil</External>
+	<Item class="Folder" referent="RBX2B429D1676CA40D3A5EAA27B3FAD5922">
+		<Properties>
+			<BinaryString name="AttributesSerialize"></BinaryString>
+			<string name="Name">GuiToLuaV3</string>
+			<int64 name="SourceAssetId">-1</int64>
+			<BinaryString name="Tags"></BinaryString>
+		</Properties>
+		<Item class="ModuleScript" referent="RBXA3B4C5F0A2F748629DB67A1EC3DEA27C">
+			<Properties>
+				<BinaryString name="AttributesSerialize"></BinaryString>
+				<Content name="LinkedSource"><null></null></Content>
+				<string name="Name">ToString</string>
+				<string name="ScriptGuid">{936F6670-7505-44FE-83BB-AAB9A91D771B}</string>
+				<ProtectedString name="Source"><![CDATA[typeof = typeof or nil
+main = nil
+
+userdatas = {
+	Axes = function(value)
+		local result = ''
+		local normalids = {'Back', 'Bottom', 'Front', 'Left', 'Right', 'Top'}
+		local axisS = {'X', 'Y', 'Z'}
+		for i, normalid in pairs(normalids) do
+			if not value[normalid] then
+				table.remove(normalids, i)
+			end
+		end
+		for i, axis in pairs(axisS) do
+			if not value[axis] then
+				table.remove(axisS, i)
+			end
+		end
+
+		for i, normalid in pairs(normalids) do
+			if value[normalid] then
+				result = result .. 'Enum.NormalId.' .. normalid
+				if #normalids > 1 and i < #normalids then
+					result = result .. ', '
+				end
+			end
+		end
+		if #axisS > 0 then
+			result = result .. ', '
+		end
+		for i, axis in pairs(axisS) do
+			if value[axis] then
+				result = result .. 'Enum.Axis.' .. axis
+				if #axisS > 1 and i < #axisS then
+					result = result .. ', '
+				end
+			end
+		end
+		return ('Axes.new(%s)'):format(result)
+	end,
+	BrickColor = function(value)
+		return ('BrickColor.new(%s)'):format(main(value.Name))
+	end,
+	CFrame = function(value)
+		return ('CFrame.new(%s)'):format(tostring(value))
+	end,
+	Color3 = function(value)
+		return ('Color3.fromRGB(%s)'):format(main({math.floor(value.R * 255), math.floor(value.G * 255), math.floor(value.B * 255)}))
+	end,
+	ColorSequence = function(value)
+		return ('ColorSequence.new(%s)'):format(main(value.Keypoints, true))
+	end,
+	ColorSequenceKeypoint = function(value)
+		return ('ColorSequenceKeypoint.new(%s)'):format(main({value.Time, value.Value}))
+	end,
+	Faces = function(value)
+		local result = ''
+		local normalids = {'Back', 'Bottom', 'Front', 'Left', 'Right', 'Top'}
+		for i, normalid in pairs(normalids) do
+			if not value[normalid] then
+				table.remove(normalids, i)
+			end
+		end
+
+		for i, normalid in pairs(normalids) do
+			result = result .. 'Enum.NormalId.' .. normalid
+			if #normalids > 1 and i < #normalids then
+				result = result .. ', '
+			end
+		end
+		return ('Faces.new(%s)'):format(result)
+	end,
+	Instance = function(value)
+		local result = ''
+		local object = value
+
+		if object == nil or object == game or object == workspace then
+			return tostring(object):lower()
+		elseif object.Parent == game then
+			return ('game:GetService\'%s\''):format(object.ClassName)
+		elseif object == game.Players.LocalPlayer then
+			return 'game:GetService\'Players\'.LocalPlayer'
+		end
+
+		repeat
+			if object then
+				if object == workspace then
+					result = 'workspace' .. result
+				elseif object.Parent == game then
+					result = ('game:GetService\'%s\''):format(object.ClassName) .. result
+				else
+					result = ('[\'%s\']'):format(object.Name:gsub('\'', '\\\'')) .. result
+				end
+
+				object = object.Parent
+			else
+				result = '--[[nil]]' .. result
+				object = game
+			end
+		until object == game
+
+		return result
+	end,
+	NumberRange = function(value)
+		return ('NumberRange.new(%s)'):format(main({value.Min, value.Max}))
+	end,
+	NumberSequence = function(value)
+		return ('NumberSequence.new(%s)'):format(main(value.Keypoints, true))
+	end,
+	NumberSequenceKeypoint = function(value)
+		return ('NumberSequenceKeypoint.new(%s)'):format(main({value.Time, value.Value, value.Envelope}))
+	end,
+	PathWaypoint = function(value)
+		return ('PathWaypoint.new(%s)'):format(main({value.Position, value.Action}))
+	end,
+	PhysicalProperties = function(value)
+		return ('PhysicalProperties.new(%s)'):format(main({value.Density, value.Friction, value.Elasticity, value.FrictionWeight, value.ElasticityWeight}))
+	end,
+	Ray = function(value)
+		return ('Ray.new(%s)'):format(main({value.Origin, value.Direction}))
+	end,
+	Rect = function(value)
+		return ('Rect.new(%s)'):format(main({value.Min, value.Max}))
+	end,
+	Region3int16 = function(value)
+		return ('Region3in16.new(%s)'):format(main({value.Min, value.Max}))
+	end,
+	TweenInfo = function(value)
+		return ('TweenInfo.new(%s)'):format(main({value.Time, value.EasingStyle, value.EasingDirection, value.RepeatCount, value.Reverses, value.DelayTime}))
+	end,
+	UDim = function(value)
+		return ('UDim.new(%s)'):format(main({value.Scale, value.Offset}))
+	end,
+	UDim2 = function(value)
+		return ('UDim2.new(%s)'):format(main({value.X, value.Y}))
+	end,
+	Vector2 = function(value)
+		return ('Vector2.new(%s)'):format(main({value.X, value.Y}))
+	end,
+	Vector2int16 = function(value)
+		return ('Vector2int16.new(%s)'):format(main({value.X, value.Y}))
+	end,
+	Vector3 = function(value)
+		return ('Vector3.new(%s)'):format(main({value.X, value.Y, value.Z}))
+	end,
+	Vector3int16 = function(value)
+		return ('Vector3int16.new(%s)'):format(main({value.X, value.Y, value.Z}))
+	end,
+}
+
+datatypes = {
+	string = function(value)
+		return ('\'%s\''):format(tostring(value):gsub('\'', '\\\''))
+	end,
+	table = function(value, includecurly)
+		local result = ''
+
+		local index = 0
+		local length = 0;for i,v in pairs(value) do length = length + 1 end;
+		for i, v in pairs(value) do
+			index = index + 1
+			if typeof(i) == 'number' then
+				result = result .. main(v)
+			else
+				result = result .. tostring(i) .. ' = ' .. main(v)
+			end
+			if length > 1 and index < length then
+				result = result .. ', '
+			end
+		end
+
+		if includecurly then
+			result = '{' .. result .. '}'
+		end
+
+		return result
+	end,
+
+}
+
+main = function(value, includecurly)
+	local oldtype = type
+	local type = typeof(value)
+	if datatypes[type] then
+		return datatypes[type](value, includecurly)
+	elseif userdatas[type] then
+		return userdatas[type](value)
+	end
+	return tostring(value)
+end
+
+return {
+	tostring = main,
+	userdatas = userdatas,
+	datatypes = datatypes,
+}]]></ProtectedString>
+				<int64 name="SourceAssetId">-1</int64>
+				<BinaryString name="Tags"></BinaryString>
+			</Properties>
+		</Item>
+		<Item class="ModuleScript" referent="RBX9C810D13ED4449D0BB2691A28E9EB2D5">
+			<Properties>
+				<BinaryString name="AttributesSerialize"></BinaryString>
+				<Content name="LinkedSource"><null></null></Content>
+				<string name="Name">Properties</string>
+				<string name="ScriptGuid">{F5A90DD2-E64D-40AA-AFEB-B57E97B04612}</string>
+				<ProtectedString name="Source"><![CDATA[local properties = {
+	ScreenGui = {
+		--data
+		'DisplayOrder',
+		'Enabled',
+		'IgnoreGuiInset',
+		'Name',
+		'Parent',
+		'ResetOnSpawn',
+		'ZIndexBehavior',
+		--behavior
+		'Archivable',
+		--Localiztation
+		'AutoLocalize',
+		'RootLocalizationTable'
+	},
+	TextButton = {
+		--data
+		'Active',
+		'AnchorPoint',
+		'AutoButtonColor',
+		'AutomaticSize',
+		'BackgroundColor3',
+		'BackgroundTransparency',
+		'BorderColor3',
+		'BorderMode',
+		'BorderSizePixel',
+		'LayoutOrder',
+		'Modal',
+		'Name',
+		'Parent',
+		'Position',
+		'Rotation',
+		'Selectable',
+		'Selected',
+		'Size',
+		'SizeConstraint',
+		'Style',
+		'Visible',
+		'ZIndex',
+		--behavior
+		'Archivable',
+		'ClipsDescendants',
+		'NextSelectionDown',
+		'NextSelectionLeft',
+		'NextSelectionRight',
+		'NextSelectionUp',
+		--text
+		'Font',
+		'LineHeight',
+		'MaxVisibleGraphemes',
+		'RichText',
+		'Text',
+		'TextColor3',
+		'TextScaled',
+		'TextSize',
+		'TextStrokeColor3',
+		'TextStrokeTransparency',
+		'TextTransparency',
+		'TextTruncate',
+		'TextWrapped',
+		'TextXAlignment',
+		'TextYAlignment',
+		--localization
+		'AutoLocalize',
+		'RootLocalizationTable'
+	},
+	TextLabel = {
+		--data
+		'Active',
+		'AnchorPoint',
+		'AutomaticSize',
+		'BackgroundColor3',
+		'BackgroundTransparency',
+		'BorderColor3',
+		'BorderMode',
+		'BorderSizePixel',
+		'LayoutOrder',
+		'Name',
+		'Parent',
+		'Position',
+		'Rotation',
+		'Selectable',
+		'Size',
+		'SizeConstraint',
+		'Visible',
+		'ZIndex',
+		--behavior
+		'Archivable',
+		'ClipsDescendants',
+		'NextSelectionDown',
+		'NextSelectionLeft',
+		'NextSelectionRight',
+		'NextSelectionUp',
+		--text
+		'Font',
+		'LineHeight',
+		'MaxVisibleGraphemes',
+		'RichText',
+		'Text',
+		'TextColor3',
+		'TextScaled',
+		'TextSize',
+		'TextStrokeColor3',
+		'TextStrokeTransparency',
+		'TextTransparency',
+		'TextTruncate',
+		'TextWrapped',
+		'TextXAlignment',
+		'TextYAlignment',
+		--localization
+		'AutoLocalize',
+		'RootLocalizationTable'
+	},
+	TextBox = {
+		--data
+		'Active',
+		'AnchorPoint',
+		'AutomaticSize',
+		'BackgroundColor3',
+		'BackgroundTransparency',
+		'BorderColor3',
+		'BorderMode',
+		'BorderSizePixel',
+		'ClearTextOnFocus',
+		'LayoutOrder',
+		'MultiLine',
+		'Name',
+		'Parent',
+		'Position',
+		'Rotation',
+		'Selectable',
+		'SelectionStart',
+		'ShowNativeInput',
+		'Size',
+		'SizeConstraint',
+		'Visible',
+		'ZIndex',
+		--behavior
+		'Archivable',
+		'ClipsDescendants',
+		'NextSelectionDown',
+		'NextSelectionLeft',
+		'NextSelectionRight',
+		'NextSelectionUp',
+		--text
+		'Font',
+		'LineHeight',
+		'MaxVisibleGraphemes',
+		'PlaceholderColor3',
+		'PlaceholderText',
+		'RichText',
+		'Text',
+		'TextColor3',
+		'TextScaled',
+		'TextSize',
+		'TextStrokeColor3',
+		'TextStrokeTransparency',
+		'TextTransparency',
+		'TextTruncate',
+		'TextWrapped',
+		'TextXAlignment',
+		'TextYAlignment',
+		--localization
+		'AutoLocalize',
+		'RootLocalizationTable'
+	},
+	ImageLabel = {
+		--data
+		'Active',
+		'AnchorPoint',
+		'AutomaticSize',
+		'BackgroundColor3',
+		'BackgroundTransparency',
+		'BorderColor3',
+		'BorderMode',
+		'BorderSizePixel',
+		'LayoutOrder',
+		'Name',
+		'Parent',
+		'Position',
+		'Rotation',
+		'Selectable',
+		'Size',
+		'SizeConstraint',
+		'Visible',
+		'ZIndex',
+		--behavior
+		'Archivable',
+		'ClipsDescendants',
+		'NextSelectionDown',
+		'NextSelectionLeft',
+		'NextSelectionRight',
+		'NextSelectionUp',
+		--Image
+		'Image',
+		'ImageColor3',
+		'ImageRectOffset',
+		'ImageRectSize',
+		'ImageTransparency',
+		'ScaleType',
+		'SliceScale',
+		--localization
+		'AutoLocalize',
+		'RootLocalizationTable'
+	},
+	ImageButton = {
+		--data
+		'Active',
+		'AnchorPoint',
+		'AutoButtonColor',
+		'AutomaticSize',
+		'BackgroundColor3',
+		'BackgroundTransparency',
+		'BorderColor3',
+		'BorderMode',
+		'BorderSizePixel',
+		'LayoutOrder',
+		'Modal',
+		'Name',
+		'Parent',
+		'Position',
+		'Rotation',
+		'Selectable',
+		'Selected',
+		'Size',
+		'SizeConstraint',
+		'Style',
+		'Visible',
+		'ZIndex',
+		--behavior
+		'Archivable',
+		'ClipsDescendants',
+		'NextSelectionDown',
+		'NextSelectionLeft',
+		'NextSelectionRight',
+		'NextSelectionUp',
+		--Image
+		'HoverImage',
+		'Image',
+		'ImageColor3',
+		'ImageRectOffset',
+		'ImageRectSize',
+		'ImageTransparency',
+		'ScaleType',
+		'SliceScale',
+		--localization
+		'AutoLocalize',
+		'RootLocalizationTable'
+	},
+	Frame = {
+		--data
+		'Active',
+		'AnchorPoint',
+		'AutomaticSize',
+		'BackgroundColor3',
+		'BackgroundTransparency',
+		'BorderColor3',
+		'BorderMode',
+		'BorderSizePixel',
+		'LayoutOrder',
+		'Name',
+		'Parent',
+		'Position',
+		'Rotation',
+		'Selectable',
+		'Size',
+		'SizeConstraint',
+		'Style',
+		'Visible',
+		'ZIndex',
+		--behavior
+		'Archivable',
+		'ClipsDescendants',
+		'NextSelectionDown',
+		'NextSelectionLeft',
+		'NextSelectionRight',
+		'NextSelectionUp',
+		--localization
+		'AutoLocalize',
+		'RootLocalizationTable'
+	},
+	ScrollingFrame = {
+		--data
+		'Active',
+		'AnchorPoint',
+		'AutomaticSize',
+		'BackgroundColor3',
+		'BackgroundTransparency',
+		'BorderColor3',
+		'BorderMode',
+		'BorderSizePixel',
+		'LayoutOrder',
+		'Name',
+		'Parent',
+		'Position',
+		'Rotation',
+		'Selectable',
+		'Size',
+		'SizeConstraint',
+		'Visible',
+		'ZIndex',
+		--behavior
+		'Archivable',
+		'ClipsDescendants',
+		'NextSelectionDown',
+		'NextSelectionLeft',
+		'NextSelectionRight',
+		'NextSelectionUp',
+		--scrolling
+		'AutomaticCanvasSize',
+		'BottomImage',
+		'CanvasPosition',
+		'CanvasSize',
+		'ElasticBehavior',
+		'HorizontalScrollBarInset',
+		'MidImage',
+		'ScrollBarImageColor3',
+		'ScrollBarImageTransparency',
+		'ScrollBarThickness',
+		'ScrollingDirection',
+		'ScrollingEnabled',
+		'TopImage',
+		'VerticalScrollBarInset',
+		'VerticalScrollBarPosition',
+		--localization
+		'AutoLocalize',
+		'RootLocalizationTable'
+	},
+	LocalScript = {
+		--data
+		'Name',
+		'Parent',
+		--behavior
+		'Archivable',
+		'Disabled'
+	},
+	ModuleScript = {
+		--data
+		'Name',
+		'Parent',
+		--behavior
+		'Archivable',
+	},
+	UIGradient = {
+		--appearance
+		'Color',
+		'Enabled',
+		'Offset',
+		'Rotation',
+		'Transparency',
+		--data
+		'Name',
+		'Parent',
+		--behavior
+		'Archivable'
+	},
+	UICorner = {
+		--appearance
+		'CornerRadius',
+		--data
+		'Name',
+		'Parent',
+		--behavior
+		'Archivable',
+	},
+	UIAspectRatioConstraint = {
+		--data
+		'Name',
+		'Parent',
+		--behavior
+		'Archivable',
+		'AspectRatio',
+		'AspectType',
+		'DominantAxis'
+	},
+	UIGridLayout = {
+		--appearance
+		'CellPadding',
+		'CellSize',
+		--data
+		'Name',
+		'Parent',
+		--behavior
+		'Archivable',
+		'FillDirection',
+		'FillDirectionMaxCells',
+		'HorizontalAlignment',
+		'SortOrder',
+		'StartCorner',
+		'VerticalAlignment'
+	},
+	UIListLayout = {
+		--appearance
+		'Padding',
+		--data
+		'Name',
+		'Parent',
+		--behavior
+		'Archivable',
+		'FillDirection',
+		'HorizontalAlignment',
+		'SortOrder',
+		'VerticalAlignment'
+	},
+	UIPadding = {
+		--data
+		'Name',
+		'Parent',
+		--behavior
+		'Archivable',
+		'PaddingBottom',
+		'PaddingLeft',
+		'PaddingRight',
+		'PaddingTop'
+	},
+	UIPageLayout = {
+		--appearance
+		'Animated',
+		'Circular',
+		'EasingDirection',
+		'EasingStyle',
+		'Padding',
+		'TweenTime',
+		--data
+		'Name',
+		'Parent',
+		--behavior
+		'Archivable',
+		'FillDirection',
+		'HorizontalAlignment',
+		'SortOrder',
+		'VerticalAlignment',
+		--input
+		'GamepadInputEnabled',
+		'ScrollWheelInputEnabled',
+		'TouchInputEnabled'
+	},
+	UIScale = {
+		--data
+		'Name',
+		'Parent',
+		--behavior
+		'Archivable',
+		'Scale'
+	},
+	UISizeConstraint = {
+		--data
+		'Name',
+		'Parent',
+		--behavior
+		'Archivable',
+		'MaxSize',
+		'MinSize'
+	},
+	UITableLayout = {
+		--appearance
+		'FillEmptySpaceColumns',
+		'FillEmptySpaceRows',
+		'Padding',
+		--data
+		'Name',
+		'Parent',
+		--behavior
+		'Archivable',
+		'FillDirection',
+		'HorizontalAlignment',
+		'MajorAxis',
+		'SortOrder',
+		'VerticalAlignment'
+	},
+	UITextSizeConstraint = {
+		--data
+		'Name',
+		'Parent',
+		--behavior
+		'Archivable',
+		'MaxTextSize',
+		'MinTextSize'
+	},
+	VideoFrame = {
+		--appearance
+		'SelectionImageObject',
+		--data
+		'Active',
+		'AnchorPoint',
+		'AutomaticSize',
+		'BackgroundColor3',
+		'BackgroundTransparency',
+		'BorderColor3',
+		'BorderMode',
+		'BorderSizePixel',
+		'LayoutOrder',
+		'Name',
+		'Parent',
+		'Position',
+		'Rotation',
+		'Selectable',
+		'Size',
+		'SizeConstraint',
+		'Visible',
+		'ZIndex',
+		--behavior
+		'Archivable',
+		'ClipsDescendants',
+		'NextSelectionDown',
+		'NextSelectionLeft',
+		'NextSelectionRight',
+		'NextSelectionUp',
+		--video
+		'Looped',
+		'Playing',
+		'Resolution',
+		'TimeLength',
+		'TimePosition',
+		'Video',
+		'Volume',
+		--localization
+		'AutoLocalize',
+		'RootLocalizationTable'
+	},
+	ViewportFrame = {
+		--appearance
+		'Ambient',
+		'LightColor',
+		'LightDirection',
+		'SelectionImageObject',
+		--data
+		'Active',
+		'AnchorPoint',
+		'AutomaticSize',
+		'BackgroundColor3',
+		'BackgroundTransparency',
+		'BorderColor3',
+		'BorderMode',
+		'BorderSizePixel',
+		'CurrentCamera',
+		'LayoutOrder',
+		'Name',
+		'Parent',
+		'Position',
+		'Rotation',
+		'Selectable',
+		'Size',
+		'SizeConstraint',
+		'Visible',
+		'ZIndex',
+		--behavior
+		'Archivable',
+		'ClipsDescendants',
+		'NextSelectionDown',
+		'NextSelectionLeft',
+		'NextSelectionRight',
+		'NextSelectionUp',
+		--image
+		'ImageColor3',
+		'ImageTransparency',
+		--localization
+		'AutoLocalize',
+		'RootLocalizationTable'
+	},
+	BillboardGui = {
+		--data
+		'Active',
+		'Adornee',
+		'AlwaysOnTop',
+		'Enabled',
+		'ExtentsOffset',
+		'ExtentsOffsetWorldSpace',
+		'LightInfluence',
+		'MaxDistance',
+		'Name',
+		'Parent',
+		'PlayerToHideFrom',
+		'ResetOnSpawn',
+		'Size',
+		'SizeOffset',
+		'StudsOffset',
+		'StudsOffsetWorldSpace',
+		'ZIndexBehavior',
+		--behavior
+		'Archivable',
+		'ClipsDescendants',
+		--localization
+		'AutoLocalize',
+		'RootLocalizationTable'
+	},
+	Hint = {
+		--appearance
+		'Text',
+		--data
+		'Name',
+		'Parent',
+		--behavior
+		'Archivable'
+	},
+	Message = {
+		--appearance
+		'Text',
+		--data
+		'Name',
+		'Parent',
+		--behavior
+		'Archivable'
+	},
+	BoolValue = {
+		--data
+		'Name',
+		'Parent',
+		'Value',
+		--behavior
+		'Archivable'
+	},
+	BrickColorValue = {
+		--data
+		'Name',
+		'Parent',
+		'Value',
+		--behavior
+		'Archivable'
+	},
+	CFrameValue = {
+		--data
+		'Name',
+		'Parent',
+		--behavior
+		'Archivable'
+	},
+	Color3Value = {
+		--data
+		'Name',
+		'Parent',
+		'Value',
+		--behavior
+		'Archivable'
+	},
+	IntValue = {
+		--data
+		'Name',
+		'Parent',
+		'Value',
+		--behavior
+		'Archivable'
+	},
+	NumberValue = {
+		--data
+		'Name',
+		'Parent',
+		'Value',
+		--behavior
+		'Archivable'
+	},
+	ObjectValue = {
+		--data
+		'Name',
+		'Parent',
+		'Value',
+		--behavior
+		'Archivable'
+	},
+	RayValue = {
+		--data
+		'Name',
+		'Parent',
+		--behavior
+		'Archivable'
+	},
+	StringValue = {
+		--data
+		'Name',
+		'Parent',
+		'Value',
+		--behavior
+		'Archivable'
+	},
+	Vector3Value = {
+		--data
+		'Name',
+		'Parent',
+		'Value',
+		--behavior
+		'Archivable'
+	},
+	Part = {
+		--appearance
+		'BrickColor',
+		'CastShadow',
+		'Color',
+		'Material',
+		'Reflectance',
+		'Transparency',
+		--data
+		'Name',
+		'Orientation',
+		'Parent',
+		'Position',
+        --[[--transform
+        'Origin Position',
+        'Origin Orientation',
+        --pivot
+        'Pivot Offset Position',
+        'Pivot Offset Orientation',]]
+		--behavior
+		'Anchored',
+		'Archivable',
+		'CanCollide',
+		'CanTouch',
+		'CollisionGroupId',
+		'Locked',
+		'Massless',
+		--part
+		'CustomPhysicalProperties',
+		'RootPriority',
+		'Shape',
+		'Size',
+		--assembly
+		'AssemblyLinearVelocity',
+		'AssemblyAngularVelocity'
+	},
+	MeshPart = {
+		--appearance
+		'BrickColor',
+		'CastShadow',
+		'Color',
+		'DoubleSided',
+		'Material',
+		'MeshId',
+		'Reflectance',
+		'RenderFidelity',
+		'TextureID',
+		'Transparency',
+		--data
+		'Name',
+		'Orientation',
+		'Parent',
+		'Position',
+        --[[--transform
+        'Origin Position',
+        'Origin Orientation',
+        --pivot
+        'Pivot Offset Position',
+        'Pivot Offset Orientation',]]
+		--behavior
+		'Anchored',
+		'Archivable',
+		'CanCollide',
+		'CanTouch',
+		'CollisionFidelity',
+		'CollisionGroupId',
+		'Locked',
+		'Massless',
+		--part
+		'CustomPhysicalProperties',
+		'RootPriority',
+		'Size',
+		--assembly
+		'AssemblyLinearVelocity',
+		'AssemblyAngularVelocity'
+	},
+	Humanoid = {
+		--data
+		'CameraOffset',
+		'DisplayDistanceType',
+		'DisplayName',
+		'HealthDisplayDistance',
+		'HealthDisplayType',
+		'Name',
+		'NameDisplayDistance',
+		'NameOcclusion',
+		'Parent',
+		'RigType',
+		--behavior
+		'Archivable',
+		'BreakJointsOnDeath',
+		'RequireNeck',
+		--jump settings
+		'AutoJumpEnabled',
+		'JumpPower',
+		'UseJumpPower',
+		--control
+		'AutoRotate',
+		'Jump',
+		'PlatformStand',
+		'Sit',
+		'TargetPoint',
+		'WalkToPart',
+		'WalkToPoint',
+		--game
+		'AutomaticScalingEnabled',
+		'Health',
+		'HipHeight',
+		'MaxHealth',
+		'MaxSlopeAngle',
+		'WalkSpeed'
+	},
+	BoxHandleAdornment = {
+		--appearance
+		'Color3',
+		'Transparency',
+		--data
+		'AdornCullingMode',
+		'Adornee',
+		'AlwaysOnTop',
+		'Name',
+		'Parent',
+		'Size',
+		'SizeRelativeOffset',
+		'Visible',
+		'ZIndex',
+		--behavior
+		'Archivable'
+	},
+	BindableEvent = {
+		--data
+		'Name',
+		'Parent',
+		--behavior
+		'Archivable',
+	},
+	BindableFunction = {
+		--data
+		'Name',
+		'Parent',
+		--behavior
+		'Archivable',
+	},
+}
+
+return properties]]></ProtectedString>
+				<int64 name="SourceAssetId">-1</int64>
+				<BinaryString name="Tags"></BinaryString>
+			</Properties>
+		</Item>
+		<Item class="Script" referent="RBX8C69A0696C2B4DA7820C860A37B659A9">
+			<Properties>
+				<BinaryString name="AttributesSerialize"></BinaryString>
+				<bool name="Disabled">false</bool>
+				<Content name="LinkedSource"><null></null></Content>
+				<string name="Name">MainScript</string>
+				<string name="ScriptGuid">{16FDADB9-9FB3-4B51-968F-E8C2326FCDCA}</string>
+				<ProtectedString name="Source"><![CDATA[local selection = game:GetService'Selection'
+local plugin_name = script.Parent.Name
+local properties = require(script.Parent.Properties)
+local ToString = require(script.Parent.ToString).tostring
+
+assert(plugin, 'tf?')
+
+local totalscriptsmade = 0
+
+function main()
+	local function tablefindlower(Table, Value)
+		for I, V in next, Table do
+			if tostring(V):lower() == tostring(Value):lower() then
+				return I, V
+			end
+		end
+	end
+	local function tablefindlowerByIndex(Table, Index)
+		for I, V in next, Table do
+			if tostring(I):lower() == tostring(Index):lower() then
+				return I, V
+			end
+		end
+	end
+	
+	for i, selected in pairs(selection:Get()) do
+		if selected:IsA'ScreenGui' then
+			local objects = {}
+			local descendants = {}
+
+			local function getRealProperties(descendant) 
+				if descendant and properties[descendant.ClassName] then
+					local defaultobject = Instance.new(descendant.ClassName)
+
+					local realproperties = {}
+					for i, property in pairs(properties[descendant.ClassName]) do
+						if descendant[property] ~= defaultobject[property] then
+							table.insert(realproperties, property)
+						end
+					end
+
+					defaultobject:Destroy()
+
+					return realproperties
+				end
+			end
+			for i,descendant in pairs(selected:GetDescendants()) do
+				if descendant then
+					if properties[descendant.ClassName] then
+						table.insert(descendants, descendant)
+					else
+						warn(descendant.ClassName .. ' is not supported. Message TechHog#8984 to request support for this object.')
+					end
+				end
+			end
+			local totaldescendants = #descendants
+
+			local function getname(object)
+				if objects[object] then return objects[object] end
+				local name = object.Name
+
+				if name:sub(1, 1):match('%d') then
+					name = '_' .. name
+				end
+
+				name = name:gsub('[^%w_]', '_'):gsub('___module__scripts___', '__module_scripts__')
+
+				--[[local duplicates = 0
+
+				for o, n in pairs(objects) do
+					local add1 = '__' .. tostring(duplicates)
+					local add2 = '__' .. tostring(duplicates + 1)
+					if o ~= object and (n == name or n == name .. add1 or n == name .. add2) then
+						duplicates = duplicates + 1
+						print(o, 'found a duplicate, #' .. tostring(duplicates))
+					end
+				end
+
+				if duplicates > 0 then
+					name = name .. '__' .. tostring(duplicates)
+				end]]
+				
+				;(function() --duplicate handler
+					if tablefindlower(objects, name) then
+						local count = 2
+						while true do
+							local dupe = false
+							for i,v in next, objects do
+								if v == name .. '__' .. tostring(count) then
+									dupe = true
+									break
+								end
+							end
+							
+							if not dupe then
+								name = name .. '__' .. tostring(count)
+								
+								return name
+							end
+							
+							count += 1
+						end
+					end
+				end)();
+
+				objects[object] = name
+
+				return name
+			end
+
+			local function descendantOfTypeExists(type)
+				for i, descendant in pairs(descendants) do
+					if descendant and descendant:IsA(type) then
+						return true
+					end
+				end
+			end
+			local function attributesExist()
+				for i, v in pairs(selected:GetAttributes()) do
+					return true
+				end
+				for i, v in pairs(descendants) do
+					for i,v in pairs(v:GetAttributes()) do
+						return true
+					end
+				end
+			end
+
+			totalscriptsmade = totalscriptsmade + 1
+
+			local script = Instance.new'LocalScript'
+			script.Parent = selected.Parent
+			script.Name = selected.Name .. ' - guitolua v3 #' .. tostring(totalscriptsmade)
+
+			local source = '--GuiToLua V3\n'
+
+			--objects
+			source = source .. '\n--objects\n'
+
+			local selectedname = getname(selected)
+			source = source .. ('local %s = Instance.new\'ScreenGui\'\n\n'):format(selectedname)
+
+			for i, descendant in pairs(descendants) do
+				if descendant and properties[descendant.ClassName] then
+					local name = getname(descendant)
+					source = source .. ('local %s = Instance.new\'%s\'\n'):format(name, descendant.ClassName)
+				end
+			end
+
+			--properties
+			source = source .. '\n--properties\n'
+
+			local defaultGui = Instance.new'ScreenGui'
+			for i, property in pairs(properties.ScreenGui) do
+				if selected[property] ~= defaultGui[property] then
+					local propertyexists, result = pcall(function()return selected[property] end)
+					if propertyexists then
+						if property == 'Parent' then
+							source = source .. ('%s.Parent = game:GetService\'Players\'.LocalPlayer:WaitForChild(\'PlayerGui\', math.huge)\n'):format(selectedname)
+						else
+							source = source .. ('%s.%s = %s\n'):format(selectedname, property, ToString(result))
+						end
+					end
+				end
+			end
+
+			source = source .. '\n'
+
+			for descindex, descendant in pairs(descendants) do
+				local realproperties = getRealProperties(descendant)
+				if realproperties then
+					local name = getname(descendant)
+
+					for propindex, property in pairs(realproperties) do
+						local propertyexists, result = pcall(function()return descendant[property] end)
+						if propertyexists then
+							local totalproperties = #realproperties
+
+							local propertystring = objects[result] or ToString(result)
+
+							local str = ('%s.%s = %s'):format(name, property, propertystring)
+
+							if descindex == totaldescendants and propindex == totalproperties then
+								source = source .. str
+							else
+								source = source .. str .. '\n'
+							end
+
+							--source = source .. str
+						end
+					end
+					if totaldescendants > 1 and descindex < totaldescendants then
+						source = source .. '\n'
+					end
+				end
+			end
+
+			--attributes
+
+			if attributesExist() then
+				source = source .. '\n--attributes\n'
+
+				for attribute, value in pairs(selected:GetAttributes()) do
+					source = source .. ('%s:SetAttribute(%s, %s)\n'):format(selectedname, ToString(attribute), ToString(value))
+				end
+
+				source = source .. '\n'
+
+				for i, descendant in pairs(descendants) do
+					if descendant then
+						local name = getname(descendant)
+						for attribute, value in pairs(descendant:GetAttributes()) do
+							source = source .. ('%s:SetAttribute(%s, %s)\n'):format(name, ToString(attribute), ToString(value))
+						end
+						if #descendant:GetAttributes() > 0 then
+							source = source .. '\n'
+						end
+					end
+				end 
+			end
+
+			--modulescripts
+			local ModuleScriptExists = descendantOfTypeExists('ModuleScript')
+			local LocalScriptExists = descendantOfTypeExists('LocalScript')
+			
+			if ModuleScriptExists then
+				source = source .. '\n\n--module scripts\n\nlocal ___module__scripts___ = {}\n\n'
+
+				for i, descendant in pairs(descendants) do
+					if descendant and descendant:IsA'ModuleScript' then
+						local name = getname(descendant)
+
+						source = source .. ('___module__scripts___[%s] = function()\n\tlocal script = %s\n\n\t%s;\nend\n'):format(name, name, descendant.Source:gsub('\n', '\n\t'))
+					end
+				end
+			end
+			--scripts
+			if LocalScriptExists then
+				source = source .. '\n--scripts\n'
+
+				for i, descendant in pairs(descendants) do
+					if descendant and descendant:IsA'LocalScript' then
+						local name = getname(descendant)
+						
+						local requiremessage = [[
+
+	local oldrequire = require
+	local require = function(value)
+		return ___module__scripts___[value] or oldrequire(value)
+	end
+
+]]
+						
+						source = source .. ([[
+coroutine.wrap(function()
+	local script = %s
+	%s
+	%s
+end)()
+]]										):format(name, (
+							function()
+								if ModuleScriptExists then
+									return requiremessage
+								end
+								return ''
+							end)(), descendant.Source:gsub('\n', '\n\t'))
+						--source = source .. ('coroutine.wrap(function()\n\tlocal script = %s\nlocal oldrequire = require\nlocal require = function(value)return ___modules__scripts___[value] or oldrequire(value)end\n end)()')
+					end
+				end
+			end
+
+			script.Source = source
+			plugin:OpenScript(script)
+			selection:Set({script})
+		end
+	end
+end
+
+local tb = plugin:CreateToolbar(plugin_name)
+local button = tb:CreateButton('Open / Close', '', 'rbxassetid://6910443946')
+local info = DockWidgetPluginGuiInfo.new(
+	Enum.InitialDockState.Float,
+	false,
+	false,
+	291,
+	232,
+	291,
+	232
+)
+local widget = plugin:CreateDockWidgetPluginGui(plugin_name, info)
+widget.Enabled = false
+widget.Title = plugin_name
+widget.Name = plugin_name
+button.Click:connect(function()
+	widget.Enabled = not widget.Enabled
+end)
+
+local gui = script.Parent.GuiToLuaV3GUI
+
+gui.Size = UDim2.new(1, 0, 1, 0)
+gui.Position = UDim2.new(0, 0, 0, 0)
+gui.Parent = widget
+gui.title.Text = plugin_name
+
+gui.convert.MouseButton1Click:connect(main)]]></ProtectedString>
+				<int64 name="SourceAssetId">-1</int64>
+				<BinaryString name="Tags"></BinaryString>
+			</Properties>
+		</Item>
+		<Item class="Frame" referent="RBX912E3803776E4A5494D1036312822644">
+			<Properties>
+				<bool name="Active">false</bool>
+				<Vector2 name="AnchorPoint">
+					<X>0</X>
+					<Y>0</Y>
+				</Vector2>
+				<BinaryString name="AttributesSerialize"></BinaryString>
+				<bool name="AutoLocalize">true</bool>
+				<token name="AutomaticSize">0</token>
+				<Color3 name="BackgroundColor3">
+					<R>0.152941182</R>
+					<G>0.152941182</G>
+					<B>0.152941182</B>
+				</Color3>
+				<float name="BackgroundTransparency">0</float>
+				<Color3 name="BorderColor3">
+					<R>0.105882362</R>
+					<G>0.164705887</G>
+					<B>0.207843155</B>
+				</Color3>
+				<token name="BorderMode">0</token>
+				<int name="BorderSizePixel">0</int>
+				<bool name="ClipsDescendants">false</bool>
+				<bool name="Draggable">false</bool>
+				<int name="LayoutOrder">0</int>
+				<string name="Name">GuiToLuaV3GUI</string>
+				<Ref name="NextSelectionDown">null</Ref>
+				<Ref name="NextSelectionLeft">null</Ref>
+				<Ref name="NextSelectionRight">null</Ref>
+				<Ref name="NextSelectionUp">null</Ref>
+				<UDim2 name="Position">
+					<XS>0</XS>
+					<XO>114</XO>
+					<YS>0</YS>
+					<YO>435</YO>
+				</UDim2>
+				<Ref name="RootLocalizationTable">null</Ref>
+				<float name="Rotation">0</float>
+				<bool name="Selectable">false</bool>
+				<Ref name="SelectionImageObject">null</Ref>
+				<UDim2 name="Size">
+					<XS>0</XS>
+					<XO>291</XO>
+					<YS>0</YS>
+					<YO>232</YO>
+				</UDim2>
+				<token name="SizeConstraint">0</token>
+				<int64 name="SourceAssetId">-1</int64>
+				<token name="Style">0</token>
+				<BinaryString name="Tags"></BinaryString>
+				<bool name="Visible">true</bool>
+				<int name="ZIndex">1</int>
+			</Properties>
+			<Item class="TextButton" referent="RBX3D8D0616B070451DB14EBAA032DC0EF7">
+				<Properties>
+					<bool name="Active">true</bool>
+					<Vector2 name="AnchorPoint">
+						<X>0</X>
+						<Y>0</Y>
+					</Vector2>
+					<BinaryString name="AttributesSerialize"></BinaryString>
+					<bool name="AutoButtonColor">true</bool>
+					<bool name="AutoLocalize">true</bool>
+					<token name="AutomaticSize">0</token>
+					<Color3 name="BackgroundColor3">
+						<R>0.105882362</R>
+						<G>0.105882362</G>
+						<B>0.105882362</B>
+					</Color3>
+					<float name="BackgroundTransparency">0.5</float>
+					<Color3 name="BorderColor3">
+						<R>0.105882362</R>
+						<G>0.164705887</G>
+						<B>0.207843155</B>
+					</Color3>
+					<token name="BorderMode">0</token>
+					<int name="BorderSizePixel">0</int>
+					<bool name="ClipsDescendants">false</bool>
+					<bool name="Draggable">false</bool>
+					<token name="Font">17</token>
+					<int name="LayoutOrder">0</int>
+					<float name="LineHeight">1</float>
+					<int name="MaxVisibleGraphemes">-1</int>
+					<bool name="Modal">false</bool>
+					<string name="Name">convert</string>
+					<Ref name="NextSelectionDown">null</Ref>
+					<Ref name="NextSelectionLeft">null</Ref>
+					<Ref name="NextSelectionRight">null</Ref>
+					<Ref name="NextSelectionUp">null</Ref>
+					<UDim2 name="Position">
+						<XS>0</XS>
+						<XO>54</XO>
+						<YS>0</YS>
+						<YO>90</YO>
+					</UDim2>
+					<bool name="RichText">false</bool>
+					<Ref name="RootLocalizationTable">null</Ref>
+					<float name="Rotation">0</float>
+					<bool name="Selectable">true</bool>
+					<bool name="Selected">false</bool>
+					<Ref name="SelectionImageObject">null</Ref>
+					<UDim2 name="Size">
+						<XS>0</XS>
+						<XO>182</XO>
+						<YS>0</YS>
+						<YO>49</YO>
+					</UDim2>
+					<token name="SizeConstraint">0</token>
+					<int64 name="SourceAssetId">-1</int64>
+					<token name="Style">0</token>
+					<BinaryString name="Tags"></BinaryString>
+					<string name="Text">Convert!</string>
+					<Color3 name="TextColor3">
+						<R>1</R>
+						<G>1</G>
+						<B>1</B>
+					</Color3>
+					<bool name="TextScaled">false</bool>
+					<float name="TextSize">30</float>
+					<Color3 name="TextStrokeColor3">
+						<R>0</R>
+						<G>0</G>
+						<B>0</B>
+					</Color3>
+					<float name="TextStrokeTransparency">1</float>
+					<float name="TextTransparency">0</float>
+					<token name="TextTruncate">0</token>
+					<bool name="TextWrapped">true</bool>
+					<token name="TextXAlignment">2</token>
+					<token name="TextYAlignment">1</token>
+					<bool name="Visible">true</bool>
+					<int name="ZIndex">1</int>
+				</Properties>
+				<Item class="UICorner" referent="RBX19A1596B33254778BF799E6C0D4A2E8A">
+					<Properties>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<UDim name="CornerRadius">
+							<S>0</S>
+							<O>8</O>
+						</UDim>
+						<string name="Name">UICorner</string>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+				</Item>
+			</Item>
+			<Item class="TextLabel" referent="RBX81103BD992624242ABE9CE8820B6FF30">
+				<Properties>
+					<bool name="Active">false</bool>
+					<Vector2 name="AnchorPoint">
+						<X>0</X>
+						<Y>0</Y>
+					</Vector2>
+					<BinaryString name="AttributesSerialize"></BinaryString>
+					<bool name="AutoLocalize">true</bool>
+					<token name="AutomaticSize">0</token>
+					<Color3 name="BackgroundColor3">
+						<R>1</R>
+						<G>1</G>
+						<B>1</B>
+					</Color3>
+					<float name="BackgroundTransparency">1</float>
+					<Color3 name="BorderColor3">
+						<R>0.105882362</R>
+						<G>0.164705887</G>
+						<B>0.207843155</B>
+					</Color3>
+					<token name="BorderMode">0</token>
+					<int name="BorderSizePixel">0</int>
+					<bool name="ClipsDescendants">false</bool>
+					<bool name="Draggable">false</bool>
+					<token name="Font">45</token>
+					<int name="LayoutOrder">0</int>
+					<float name="LineHeight">1</float>
+					<int name="MaxVisibleGraphemes">-1</int>
+					<string name="Name">title</string>
+					<Ref name="NextSelectionDown">null</Ref>
+					<Ref name="NextSelectionLeft">null</Ref>
+					<Ref name="NextSelectionRight">null</Ref>
+					<Ref name="NextSelectionUp">null</Ref>
+					<UDim2 name="Position">
+						<XS>0</XS>
+						<XO>0</XO>
+						<YS>0</YS>
+						<YO>0</YO>
+					</UDim2>
+					<bool name="RichText">false</bool>
+					<Ref name="RootLocalizationTable">null</Ref>
+					<float name="Rotation">0</float>
+					<bool name="Selectable">false</bool>
+					<Ref name="SelectionImageObject">null</Ref>
+					<UDim2 name="Size">
+						<XS>0</XS>
+						<XO>291</XO>
+						<YS>0</YS>
+						<YO>33</YO>
+					</UDim2>
+					<token name="SizeConstraint">0</token>
+					<int64 name="SourceAssetId">-1</int64>
+					<BinaryString name="Tags"></BinaryString>
+					<string name="Text">Gui To Lua V3</string>
+					<Color3 name="TextColor3">
+						<R>1</R>
+						<G>1</G>
+						<B>1</B>
+					</Color3>
+					<bool name="TextScaled">false</bool>
+					<float name="TextSize">37</float>
+					<Color3 name="TextStrokeColor3">
+						<R>0</R>
+						<G>0</G>
+						<B>0</B>
+					</Color3>
+					<float name="TextStrokeTransparency">1</float>
+					<float name="TextTransparency">0</float>
+					<token name="TextTruncate">0</token>
+					<bool name="TextWrapped">false</bool>
+					<token name="TextXAlignment">2</token>
+					<token name="TextYAlignment">1</token>
+					<bool name="Visible">true</bool>
+					<int name="ZIndex">1</int>
+				</Properties>
+			</Item>
+		</Item>
+	</Item>
+</roblox>
