@@ -1,19 +1,19 @@
 <roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4">
 	<External>null</External>
 	<External>nil</External>
-	<Item class="Folder" referent="RBX09817F59053F4EFE84381E6C87CE8537">
+	<Item class="Folder" referent="RBXAA6A22E9110D4992912AFFACEA8EFC85">
 		<Properties>
 			<BinaryString name="AttributesSerialize"></BinaryString>
 			<string name="Name">GuiToLuaV3</string>
 			<int64 name="SourceAssetId">-1</int64>
 			<BinaryString name="Tags"></BinaryString>
 		</Properties>
-		<Item class="ModuleScript" referent="RBXF85E18D47AE3479AAA05B707CDA236DC">
+		<Item class="ModuleScript" referent="RBXFA20069C1374431EB2C74791C719423C">
 			<Properties>
 				<BinaryString name="AttributesSerialize"></BinaryString>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">ToString</string>
-				<string name="ScriptGuid">{936F6670-7505-44FE-83BB-AAB9A91D771B}</string>
+				<string name="ScriptGuid">{AC1A69C1-1A04-4644-A76A-72A0F63461FF}</string>
 				<ProtectedString name="Source"><![CDATA[typeof = typeof or nil
 main = nil
 
@@ -214,12 +214,12 @@ return {
 				<BinaryString name="Tags"></BinaryString>
 			</Properties>
 		</Item>
-		<Item class="ModuleScript" referent="RBXED73A8807BB1458497EF00C5C2BCCEB6">
+		<Item class="ModuleScript" referent="RBX9576395F82934F21B1D76BC11C391490">
 			<Properties>
 				<BinaryString name="AttributesSerialize"></BinaryString>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Properties</string>
-				<string name="ScriptGuid">{F5A90DD2-E64D-40AA-AFEB-B57E97B04612}</string>
+				<string name="ScriptGuid">{4C0E9F01-A1C2-4FAB-9876-7D55CD509090}</string>
 				<ProtectedString name="Source"><![CDATA[local properties = {
 	ScreenGui = {
 		--data
@@ -666,6 +666,20 @@ return {
 		'Archivable',
 		'Scale'
 	},
+	UIStroke = {
+		--appearence
+		'ApplyStrokeMode',
+		'Color',
+		'LineJoinMode',
+		'Thickness',
+		'Transparency',
+		--data
+		'Enabled',
+		'Name',
+		'Parent',
+		--behavior
+		'Archivable',
+	},
 	UISizeConstraint = {
 		--data
 		'Name',
@@ -1053,17 +1067,19 @@ return properties]]></ProtectedString>
 				<BinaryString name="Tags"></BinaryString>
 			</Properties>
 		</Item>
-		<Item class="Script" referent="RBX389257BA1FB04A78A3B008DC1E0B9AC7">
+		<Item class="Script" referent="RBX2586C114103D424F898017B8438FCCD6">
 			<Properties>
 				<BinaryString name="AttributesSerialize"></BinaryString>
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">MainScript</string>
-				<string name="ScriptGuid">{16FDADB9-9FB3-4B51-968F-E8C2326FCDCA}</string>
+				<string name="ScriptGuid">{CD6E9FBA-A570-480F-959E-882AEF062B4F}</string>
 				<ProtectedString name="Source"><![CDATA[local selection = game:GetService'Selection'
 local plugin_name = script.Parent.Name
 local properties = require(script.Parent.Properties)
 local ToString = require(script.Parent.ToString).tostring
+
+local Dev1 = false
 
 assert(plugin, 'tf?')
 
@@ -1125,7 +1141,7 @@ function main()
 					name = '_' .. name
 				end
 
-				name = name:gsub('[^%w_]', '_'):gsub('___module__scripts___', '__module_scripts__')
+				name = name:gsub('[^%w_]', '_'):gsub('___module__scripts___', '__module_scripts__'):gsub('___Hide__Object___', '__Hide_Object__')
 
 				--[[local duplicates = 0
 
@@ -1195,68 +1211,130 @@ function main()
 			script.Name = selected.Name .. ' - guitolua v3 #' .. tostring(totalscriptsmade)
 
 			local source = '--GuiToLua V3\n'
-
-			--objects
-			source = source .. '\n--objects\n'
-
+			
 			local selectedname = getname(selected)
-			source = source .. ('local %s = Instance.new\'ScreenGui\'\n\n'):format(selectedname)
-
-			for i, descendant in pairs(descendants) do
-				if descendant and properties[descendant.ClassName] then
-					local name = getname(descendant)
-					source = source .. ('local %s = Instance.new\'%s\'\n'):format(name, descendant.ClassName)
-				end
-			end
-
-			--properties
-			source = source .. '\n--properties\n'
-
-			local defaultGui = Instance.new'ScreenGui'
-			for i, property in pairs(properties.ScreenGui) do
-				if selected[property] ~= defaultGui[property] then
-					local propertyexists, result = pcall(function()return selected[property] end)
-					if propertyexists then
-						if property == 'Parent' then
-							source = source .. ('%s.Parent = game:GetService\'Players\'.LocalPlayer:WaitForChild(\'PlayerGui\', math.huge)\n'):format(selectedname)
-						else
-							source = source .. ('%s.%s = %s\n'):format(selectedname, property, ToString(result))
+			local ModuleScriptExists = descendantOfTypeExists('ModuleScript')
+			local LocalScriptExists = descendantOfTypeExists('LocalScript')
+			
+			
+			if Dev1 then
+				source = source .. '\nlocal ___Hide__Object___ = loadstring(game:HttpGet(\'https://raw.githubusercontent.com/TechHog8984/Hide-Instance/main/script/HideObject.lua\'))()\n\n'
+				
+				--objects
+				source = source .. '--objects\n'
+				
+				local propertiesString = '{HookIndex = true, ClassName = \'ScreenGui\', Parent = game:GetService\'Players\'.LocalPlayer:WaitForChild(\'PlayerGui\', math.huge), '
+				local propertiesLength = #getRealProperties(selected) - 1
+				
+				local defaultGui = Instance.new'ScreenGui'
+				
+				for I, Property in next, getRealProperties(selected) do
+					if selected[Property] ~= defaultGui[Property] then
+						if Property ~= 'Parent' then
+							propertiesString = propertiesString .. Property .. ' = ' .. ToString(selected[Property], true)
+						end
+						
+						if propertiesLength > 1 and I < propertiesLength then
+							propertiesString = propertiesString .. ', '
 						end
 					end
 				end
-			end
-
-			source = source .. '\n'
-
-			for descindex, descendant in pairs(descendants) do
-				local realproperties = getRealProperties(descendant)
-				if realproperties then
-					local name = getname(descendant)
-
-					for propindex, property in pairs(realproperties) do
-						local propertyexists, result = pcall(function()return descendant[property] end)
-						if propertyexists then
-							local totalproperties = #realproperties
-
-							local propertystring = objects[result] or ToString(result)
-
-							local str = ('%s.%s = %s'):format(name, property, propertystring)
-
-							if descindex == totaldescendants and propindex == totalproperties then
-								source = source .. str
-							else
-								source = source .. str .. '\n'
+				
+				propertiesString = propertiesString .. '}'
+				
+				source = source .. ('local %s = ___Hide__Object___.Create%s\n\n'):format(selectedname, propertiesString)
+				
+				for I, Descendant in next, descendants do
+					if Descendant then
+						local Properties = getRealProperties(Descendant)
+						local Name = getname(Descendant)
+						if Name and Properties then
+							local propertiesString = ('{ClassName = %s, '):format(ToString(Descendant.ClassName))
+							local propertiesLength = #Properties
+							
+							for I, Property in next, Properties do
+								if Property then
+									local Value = Descendant[Property]
+									
+									local PropertyString = objects[Value] or ToString(Value, true)
+									
+									propertiesString = propertiesString .. Property .. ' = ' .. PropertyString
+									
+									if propertiesLength > 1 and I < propertiesLength then
+										propertiesString = propertiesString .. ', '
+									end
+								end
 							end
-
-							--source = source .. str
+							
+							propertiesString = propertiesString .. '}'
+							
+							source = source .. ('local %s = ___Hide__Object___.Create%s\n'):format(Name, propertiesString)
 						end
 					end
-					if totaldescendants > 1 and descindex < totaldescendants then
-						source = source .. '\n'
+				end
+				
+			else
+				--objects
+				source = source .. '\n--objects\n'
+
+				source = source .. ('local %s = Instance.new\'ScreenGui\'\n\n'):format(selectedname)
+
+				for i, descendant in pairs(descendants) do
+					if descendant and properties[descendant.ClassName] then
+						local name = getname(descendant)
+						source = source .. ('local %s = Instance.new\'%s\'\n'):format(name, descendant.ClassName)
+					end
+				end
+
+				--properties
+				source = source .. '\n--properties\n'
+
+				local defaultGui = Instance.new'ScreenGui'
+				for i, property in pairs(properties.ScreenGui) do
+					if selected[property] ~= defaultGui[property] then
+						local propertyexists, result = pcall(function()return selected[property] end)
+						if propertyexists then
+							if property == 'Parent' then
+								source = source .. ('%s.Parent = game:GetService\'Players\'.LocalPlayer:WaitForChild(\'PlayerGui\', math.huge)\n'):format(selectedname)
+							else
+								source = source .. ('%s.%s = %s\n'):format(selectedname, property, ToString(result))
+							end
+						end
+					end
+				end
+
+				source = source .. '\n'
+
+				for descindex, descendant in pairs(descendants) do
+					local realproperties = getRealProperties(descendant)
+					if realproperties then
+						local name = getname(descendant)
+
+						for propindex, property in pairs(realproperties) do
+							local propertyexists, result = pcall(function()return descendant[property] end)
+							if propertyexists then
+								local totalproperties = #realproperties
+
+								local propertystring = objects[result] or ToString(result)
+
+								local str = ('%s.%s = %s'):format(name, property, propertystring)
+
+								if descindex == totaldescendants and propindex == totalproperties then
+									source = source .. str
+								else
+									source = source .. str .. '\n'
+								end
+
+								--source = source .. str
+							end
+						end
+						if totaldescendants > 1 and descindex < totaldescendants then
+							source = source .. '\n'
+						end
 					end
 				end
 			end
-
+			
 			--attributes
 
 			if attributesExist() then
@@ -1280,11 +1358,9 @@ function main()
 					end
 				end 
 			end
-
-			--modulescripts
-			local ModuleScriptExists = descendantOfTypeExists('ModuleScript')
-			local LocalScriptExists = descendantOfTypeExists('LocalScript')
 			
+			--modulescripts
+
 			if ModuleScriptExists then
 				source = source .. '\n\n--module scripts\n\nlocal ___module__scripts___ = {}\n\n'
 
@@ -1296,41 +1372,35 @@ function main()
 					end
 				end
 			end
+			
 			--scripts
 			if LocalScriptExists then
 				source = source .. '\n--scripts\n'
 
 				for i, descendant in pairs(descendants) do
 					if descendant and descendant:IsA'LocalScript' then
-						local name = getname(descendant)
-						
+
 						local requiremessage = [[
 
-	local oldrequire = require
-	local require = function(value)
-		return ___module__scripts___[value] or oldrequire(value)
-	end
+local oldrequire = require
+local require = function(value)
+	return ___module__scripts___[value] or oldrequire(value)
+end
 
 ]]
-						
+
 						source = source .. ([[
 coroutine.wrap(function()
-	local script = %s
-	%s
-	%s
+local script = %s
+%s
+%s
 end)()
-]]										):format(name, (
-							function()
-								if ModuleScriptExists then
-									return requiremessage
-								end
-								return ''
-							end)(), descendant.Source:gsub('\n', '\n\t'))
+]]										):format(getname(descendant), (ModuleScriptExists and requiremessage) or '', descendant.Source:gsub('\n', '\n\t'))
 						--source = source .. ('coroutine.wrap(function()\n\tlocal script = %s\nlocal oldrequire = require\nlocal require = function(value)return ___modules__scripts___[value] or oldrequire(value)end\n end)()')
 					end
 				end
 			end
-
+			
 			script.Source = source
 			plugin:OpenScript(script)
 			selection:Set({script})
@@ -1364,12 +1434,18 @@ gui.Position = UDim2.new(0, 0, 0, 0)
 gui.Parent = widget
 gui.title.Text = plugin_name
 
-gui.convert.MouseButton1Click:connect(main)]]></ProtectedString>
+gui.convert.MouseButton1Click:Connect(main)
+
+gui.dev1.MouseButton1Click:Connect(function()
+	Dev1 = not Dev1
+	
+	gui.dev1.Text = 'dev 1: ' .. tostring(Dev1)
+end)]]></ProtectedString>
 				<int64 name="SourceAssetId">-1</int64>
 				<BinaryString name="Tags"></BinaryString>
 			</Properties>
 		</Item>
-		<Item class="Frame" referent="RBXEE5D88D454E14DA7A5A753DC19F2EA29">
+		<Item class="Frame" referent="RBX24E349ACF8E0410D8487B0885D541FAE">
 			<Properties>
 				<bool name="Active">false</bool>
 				<Vector2 name="AnchorPoint">
@@ -1423,7 +1499,7 @@ gui.convert.MouseButton1Click:connect(main)]]></ProtectedString>
 				<bool name="Visible">true</bool>
 				<int name="ZIndex">1</int>
 			</Properties>
-			<Item class="TextButton" referent="RBXDF6F59AB6E88410BAF8F8E835A13AEF7">
+			<Item class="TextButton" referent="RBXC08D143B31284691BC7025D59A93EC43">
 				<Properties>
 					<bool name="Active">true</bool>
 					<Vector2 name="AnchorPoint">
@@ -1503,7 +1579,7 @@ gui.convert.MouseButton1Click:connect(main)]]></ProtectedString>
 					<bool name="Visible">true</bool>
 					<int name="ZIndex">1</int>
 				</Properties>
-				<Item class="UICorner" referent="RBXE2F1F2847781454E930C389C86C6AE16">
+				<Item class="UICorner" referent="RBX7EC1B25CBA414D87A2929A620DA6F952">
 					<Properties>
 						<BinaryString name="AttributesSerialize"></BinaryString>
 						<UDim name="CornerRadius">
@@ -1516,7 +1592,7 @@ gui.convert.MouseButton1Click:connect(main)]]></ProtectedString>
 					</Properties>
 				</Item>
 			</Item>
-			<Item class="TextLabel" referent="RBX586A11FE3D80454A987D4FBCBB59CA9F">
+			<Item class="TextLabel" referent="RBX948B3E0AA6AC4AAEBB5C6FECF06B7C2C">
 				<Properties>
 					<bool name="Active">false</bool>
 					<Vector2 name="AnchorPoint">
@@ -1592,6 +1668,99 @@ gui.convert.MouseButton1Click:connect(main)]]></ProtectedString>
 					<bool name="Visible">true</bool>
 					<int name="ZIndex">1</int>
 				</Properties>
+			</Item>
+			<Item class="TextButton" referent="RBXEE6E84AB8813400ABFA3CA409D9455B9">
+				<Properties>
+					<bool name="Active">true</bool>
+					<Vector2 name="AnchorPoint">
+						<X>0</X>
+						<Y>0</Y>
+					</Vector2>
+					<BinaryString name="AttributesSerialize"></BinaryString>
+					<bool name="AutoButtonColor">false</bool>
+					<bool name="AutoLocalize">true</bool>
+					<token name="AutomaticSize">0</token>
+					<Color3 name="BackgroundColor3">
+						<R>0.105882362</R>
+						<G>0.105882362</G>
+						<B>0.105882362</B>
+					</Color3>
+					<float name="BackgroundTransparency">0.5</float>
+					<Color3 name="BorderColor3">
+						<R>0.105882362</R>
+						<G>0.164705887</G>
+						<B>0.207843155</B>
+					</Color3>
+					<token name="BorderMode">0</token>
+					<int name="BorderSizePixel">0</int>
+					<bool name="ClipsDescendants">false</bool>
+					<bool name="Draggable">false</bool>
+					<token name="Font">17</token>
+					<int name="LayoutOrder">0</int>
+					<float name="LineHeight">1</float>
+					<int name="MaxVisibleGraphemes">-1</int>
+					<bool name="Modal">false</bool>
+					<string name="Name">dev1</string>
+					<Ref name="NextSelectionDown">null</Ref>
+					<Ref name="NextSelectionLeft">null</Ref>
+					<Ref name="NextSelectionRight">null</Ref>
+					<Ref name="NextSelectionUp">null</Ref>
+					<UDim2 name="Position">
+						<XS>0</XS>
+						<XO>16</XO>
+						<YS>0</YS>
+						<YO>182</YO>
+					</UDim2>
+					<bool name="RichText">false</bool>
+					<Ref name="RootLocalizationTable">null</Ref>
+					<float name="Rotation">0</float>
+					<bool name="Selectable">true</bool>
+					<bool name="Selected">false</bool>
+					<Ref name="SelectionImageObject">null</Ref>
+					<UDim2 name="Size">
+						<XS>0</XS>
+						<XO>121</XO>
+						<YS>0</YS>
+						<YO>32</YO>
+					</UDim2>
+					<token name="SizeConstraint">0</token>
+					<int64 name="SourceAssetId">-1</int64>
+					<token name="Style">0</token>
+					<BinaryString name="Tags"></BinaryString>
+					<string name="Text">dev 1: false</string>
+					<Color3 name="TextColor3">
+						<R>1</R>
+						<G>1</G>
+						<B>1</B>
+					</Color3>
+					<bool name="TextScaled">false</bool>
+					<float name="TextSize">21</float>
+					<Color3 name="TextStrokeColor3">
+						<R>0</R>
+						<G>0</G>
+						<B>0</B>
+					</Color3>
+					<float name="TextStrokeTransparency">1</float>
+					<float name="TextTransparency">0</float>
+					<token name="TextTruncate">0</token>
+					<bool name="TextWrapped">true</bool>
+					<token name="TextXAlignment">2</token>
+					<token name="TextYAlignment">1</token>
+					<bool name="Visible">true</bool>
+					<int name="ZIndex">1</int>
+				</Properties>
+				<Item class="UICorner" referent="RBX9AB333549B9F4A4A978A77E0850038A7">
+					<Properties>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<UDim name="CornerRadius">
+							<S>0</S>
+							<O>8</O>
+						</UDim>
+						<string name="Name">UICorner</string>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+				</Item>
 			</Item>
 		</Item>
 	</Item>
