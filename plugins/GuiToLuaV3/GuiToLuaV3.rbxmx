@@ -1,220 +1,224 @@
 <roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4">
 	<External>null</External>
 	<External>nil</External>
-	<Item class="Folder" referent="RBX688615AB2121441CAA04345C8D3C0208">
+	<Item class="Folder" referent="RBX782D2B92BD0B450196F44AF6B90B816A">
 		<Properties>
 			<BinaryString name="AttributesSerialize"></BinaryString>
 			<string name="Name">GuiToLuaV3</string>
 			<int64 name="SourceAssetId">-1</int64>
 			<BinaryString name="Tags"></BinaryString>
 		</Properties>
-		<Item class="ModuleScript" referent="RBXC3548399782F49F7A558A64808696A92">
+		<Item class="ModuleScript" referent="RBX0E9A9DDAA47A4156B8BBB252B559373E">
 			<Properties>
 				<BinaryString name="AttributesSerialize"></BinaryString>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">ToString</string>
 				<string name="ScriptGuid">{AC1A69C1-1A04-4644-A76A-72A0F63461FF}</string>
-				<ProtectedString name="Source"><![CDATA[typeof = typeof or nil
-main = nil
+				<ProtectedString name="Source"><![CDATA[local typeof = typeof or type;
+local format = string.format;
+local sub = string.sub;
+local gsub = string.gsub;
+local match = string.match;
 
-userdatas = {
-	Axes = function(value)
-		local result = ''
-		local normalids = {'Back', 'Bottom', 'Front', 'Left', 'Right', 'Top'}
-		local axisS = {'X', 'Y', 'Z'}
-		for i, normalid in pairs(normalids) do
-			if not value[normalid] then
-				table.remove(normalids, i)
-			end
-		end
-		for i, axis in pairs(axisS) do
-			if not value[axis] then
-				table.remove(axisS, i)
-			end
-		end
+local tostring2 = nil;
 
-		for i, normalid in pairs(normalids) do
-			if value[normalid] then
-				result = result .. 'Enum.NormalId.' .. normalid
-				if #normalids > 1 and i < #normalids then
-					result = result .. ', '
-				end
-			end
-		end
-		if #axisS > 0 then
-			result = result .. ', '
-		end
-		for i, axis in pairs(axisS) do
-			if value[axis] then
-				result = result .. 'Enum.Axis.' .. axis
-				if #axisS > 1 and i < #axisS then
-					result = result .. ', '
-				end
-			end
-		end
-		return ('Axes.new(%s)'):format(result)
-	end,
-	BrickColor = function(value)
-		return ('BrickColor.new(%s)'):format(main(value.Name))
-	end,
-	CFrame = function(value)
-		return ('CFrame.new(%s)'):format(tostring(value))
-	end,
-	Color3 = function(value)
-		return ('Color3.fromRGB(%s)'):format(main({math.floor(value.R * 255), math.floor(value.G * 255), math.floor(value.B * 255)}))
-	end,
-	ColorSequence = function(value)
-		return ('ColorSequence.new(%s)'):format(main(value.Keypoints, true))
-	end,
-	ColorSequenceKeypoint = function(value)
-		return ('ColorSequenceKeypoint.new(%s)'):format(main({value.Time, value.Value}))
-	end,
-	Faces = function(value)
-		local result = ''
-		local normalids = {'Back', 'Bottom', 'Front', 'Left', 'Right', 'Top'}
-		for i, normalid in pairs(normalids) do
-			if not value[normalid] then
-				table.remove(normalids, i)
-			end
-		end
+local Types;
+do --types
+	Types = {
+		string = function(Value)
+			return format('"%s"', gsub(gsub(Value, '\n', '\\n'), '"', '\\"'));
+		end,
+		table = function(Table)
+			local InsideStr = '';
 
-		for i, normalid in pairs(normalids) do
-			result = result .. 'Enum.NormalId.' .. normalid
-			if #normalids > 1 and i < #normalids then
-				result = result .. ', '
-			end
-		end
-		return ('Faces.new(%s)'):format(result)
-	end,
-	Instance = function(value)
-		local result = ''
-		local object = value
+			local Iter = 0;
 
-		if object == nil or object == game or object == workspace then
-			return tostring(object):lower()
-		elseif object.Parent == game then
-			return ('game:GetService\'%s\''):format(object.ClassName)
-		elseif object == game.Players.LocalPlayer then
-			return 'game:GetService\'Players\'.LocalPlayer'
-		end
-
-		repeat
-			if object then
-				if object == workspace then
-					result = 'workspace' .. result
-				elseif object.Parent == game then
-					result = ('game:GetService\'%s\''):format(object.ClassName) .. result
+			for Index, Value in next, Table do
+				Iter = Iter + 1;
+				local Index = Index;
+				local Value = tostring2(Value);
+				if type(Index) == 'number' and Index == Iter then
+					InsideStr = InsideStr .. format('%s, ', Value);
 				else
-					result = ('[\'%s\']'):format(object.Name:gsub('\'', '\\\'')) .. result
-				end
+					InsideStr = InsideStr .. format('[%s] = %s, ', tostring2(Index), Value);
+				end;
+			end;
 
-				object = object.Parent
+			return format('{%s}', sub(InsideStr, 1, -3));
+		end,
+		tuple = function(...)
+			local Args = {};
+			if select('#', ...) == 1 and type((...)) == 'table' then
+				Args = (...);
 			else
-				result = '--[[nil]]' .. result
-				object = game
-			end
-		until object == game
+				Args = {...};
+			end;
 
-		return result
-	end,
-	NumberRange = function(value)
-		return ('NumberRange.new(%s)'):format(main({value.Min, value.Max}))
-	end,
-	NumberSequence = function(value)
-		return ('NumberSequence.new(%s)'):format(main(value.Keypoints, true))
-	end,
-	NumberSequenceKeypoint = function(value)
-		return ('NumberSequenceKeypoint.new(%s)'):format(main({value.Time, value.Value, value.Envelope}))
-	end,
-	PathWaypoint = function(value)
-		return ('PathWaypoint.new(%s)'):format(main({value.Position, value.Action}))
-	end,
-	PhysicalProperties = function(value)
-		return ('PhysicalProperties.new(%s)'):format(main({value.Density, value.Friction, value.Elasticity, value.FrictionWeight, value.ElasticityWeight}))
-	end,
-	Ray = function(value)
-		return ('Ray.new(%s)'):format(main({value.Origin, value.Direction}))
-	end,
-	Rect = function(value)
-		return ('Rect.new(%s)'):format(main({value.Min, value.Max}))
-	end,
-	Region3int16 = function(value)
-		return ('Region3in16.new(%s)'):format(main({value.Min, value.Max}))
-	end,
-	TweenInfo = function(value)
-		return ('TweenInfo.new(%s)'):format(main({value.Time, value.EasingStyle, value.EasingDirection, value.RepeatCount, value.Reverses, value.DelayTime}))
-	end,
-	UDim = function(value)
-		return ('UDim.new(%s)'):format(main({value.Scale, value.Offset}))
-	end,
-	UDim2 = function(value)
-		return ('UDim2.new(%s)'):format(main({value.X.Scale, value.X.Offset, value.Y.Scale, value.Y.Offset}))
-	end,
-	Vector2 = function(value)
-		return ('Vector2.new(%s)'):format(main({value.X, value.Y}))
-	end,
-	Vector2int16 = function(value)
-		return ('Vector2int16.new(%s)'):format(main({value.X, value.Y}))
-	end,
-	Vector3 = function(value)
-		return ('Vector3.new(%s)'):format(main({value.X, value.Y, value.Z}))
-	end,
-	Vector3int16 = function(value)
-		return ('Vector3int16.new(%s)'):format(main({value.X, value.Y, value.Z}))
-	end,
-}
+			local InsideStr = '';
+			for Index, Value in next, Args do
+				InsideStr = InsideStr .. tostring2(Value) .. ', ';
+			end;
+			return sub(InsideStr, 1, -3);
+		end,
+	};
+end;
 
-datatypes = {
-	string = function(value)
-		return ('\'%s\''):format(tostring(value):gsub('\'', '\\\''))
-	end,
-	table = function(value, includecurly)
-		local result = ''
+local tuple = Types.tuple;
+local DataTypes;
+do --datatypes
+	DataTypes = {
+		Axes = function(Value)
+			local InsideStr = '';
 
-		local index = 0
-		local length = 0;for i,v in pairs(value) do length = length + 1 end;
-		for i, v in pairs(value) do
-			index = index + 1
-			if typeof(i) == 'number' then
-				result = result .. main(v)
-			else
-				result = result .. tostring(i) .. ' = ' .. main(v)
-			end
-			if length > 1 and index < length then
-				result = result .. ', '
-			end
-		end
+			if Value.X then
+				InsideStr ..= 'Enum.Axis.X, ';
+			end;
+			if Value.Y then
+				InsideStr ..= 'Enum.Axis.Y, ';
+			end;
+			if Value.Z then
+				InsideStr ..= 'Enum.Axis.Z, ';
+			end;
 
-		if includecurly then
-			result = '{' .. result .. '}'
-		end
+			for I, V in next, Enum.NormalId:GetEnumItems() do
+				if V and V.Name and Value[V.Name] then
+					InsideStr ..= tostring(V) .. ', ';
+				end;
+			end;
 
-		return result
-	end,
+			return format('Axes.new(%s)', sub(InsideStr, 1, -3));
+		end,
+		BrickColor = function(Value)
+			return format('BrickColor.new(%s)', tostring2(Value.Name));
+		end,
+		CFrame = function(Value) 
+			return format('CFrame.new(%s)', tostring(Value));
+		end,
+		Color3 = function(Value)
+			return format('Color3.fromRGB(%s)', tuple(Value.R * 255, Value.G * 255, Value.B * 255));
+		end,
+		ColorSequence = function(Value)
+			return format('ColorSequence.new%s', tostring2(Value.Keypoints));
+		end,
+		ColorSequenceKeypoint = function(Value)
+			return format('ColorSequenceKeypoint.new(%s)', tuple(Value.Time, Value.Value));
+		end,
+		EnumItem = function(Value)
+			return format('Enum.%s.%s', tostring(Value.EnumType), Value.Name);
+		end,
+		Faces = function(Value)
+			local InsideStr = '';
 
-}
+			for I, V in next, Enum.NormalId:GetEnumItems() do
+				if V and V.Name and Value[V.Name] then
+					InsideStr = InsideStr .. tostring(V) .. ', ';
+				end;
+			end;
 
-main = function(value, includecurly)
-	local oldtype = type
-	local type = typeof(value)
-	if datatypes[type] then
-		return datatypes[type](value, includecurly)
-	elseif userdatas[type] then
-		return userdatas[type](value)
-	end
-	return tostring(value)
-end
+			return format('Faces.new(%s)', sub(InsideStr, 1, -3));
+		end,
+		FloatCurveKey = function(Value)
+			return format('FloatCurveKey.new(%s)',  tuple(Value.Time, Value.Value, Value.Interpolation));
+		end,
+		Instance = function(Value)
+			if Value == game then 
+				return 'game';elseif Value == workspace then
+				return 'workspace';elseif game:GetService("Players").LocalPlayer and Value == game:GetService("Players").LocalPlayer then
+				return 'game:GetService("Players").LocalPlayer';elseif Value.Parent and Value.Parent == game and Value.ClassName then
+				return format('game:GetService(%s)', tostring2(Value.ClassName));
+			end;
+			local Result = '';
 
-return {
-	tostring = main,
-	userdatas = userdatas,
-	datatypes = datatypes,
-}]]></ProtectedString>
+			repeat 
+				local Name = Value.Name;
+
+				if Value.Parent then
+					if Value == game then 
+						Result = 'game' .. Result;elseif Value == workspace then
+						Result = 'workspace' .. Result;elseif game:GetService("Players").LocalPlayer and Value == game:GetService("Players").LocalPlayer then
+						Result = '.LocalPlayer' .. Result;elseif Value.Parent and Value.Parent == game and Value.ClassName then
+						Result = format('game:GetService(%s)', tostring2(Value.ClassName)) .. Result;
+					elseif match(Name, '%W') then
+						Result = format('["%s"]', Name:gsub('%W', function(CH)return '\\' .. CH; end)) .. Result;
+					else
+						Result = format('.%s', Name) .. Result;
+					end;
+					Value = Value.Parent;
+				else
+					Value = game;
+				end;
+			until not Value or Value == game
+
+			return Result;
+		end,
+		NumberRange = function(Value)
+			return format('NumberRange.new(%s)', tuple(Value.Min, Value.Max));
+		end,
+		NumberSequence = function(Value)
+			return format('NumberSequence.new%s', tostring2(Value.Keypoints));
+		end,
+		NumberSequenceKeypoint = function(Value)
+			return format('NumberSequenceKeypoint.new(%s)', tuple(Value.Time, Value.Value, Value.Envelope));
+		end,
+		PathWaypoint = function(Value)
+			return format('PathWaypoint.new(%s)', tuple(Value.Position, Value.Action));
+		end,
+		PhysicalProperties = function(Value)
+			return format('PhysicalProperties.new(%s)', tuple(Value.Density, Value.Friction, Value.Elasticity, Value.FrictionWeight, Value.ElasticityWeight));
+		end,
+		Ray = function(Value)
+			return format('Ray.new(%s)', tuple(Value.Origin, Value.Direction));
+		end,
+		Rect = function(Value)
+			return format('Rect.new(%s)', tuple(Value.Min, Value.Max));
+		end,
+		Region3int16 = function(Value)
+			return format('Region3int16.new(%s)', tuple(Value.Min, Value.Max));
+		end,
+		TweenInfo = function(Value)
+			return format('TweenInfo.new(%s)', tuple(Value.Time, Value.EasingStyle, Value.EasingDirection, Value.RepeatCount, Value.Reverses, Value.DelayTime));
+		end,
+		UDim = function(Value)
+			return format('UDim.new(%s)', tuple(Value.Scale, Value.Offset));
+		end,
+		UDim2 = function(Value)
+			local X = Value.X;
+			local Y = Value.Y;
+			return format('UDim2.new(%s)', tuple(X.Scale, X.Offset, Y.Scale, Y.Offset));
+		end,
+		Vector2 = function(Value)
+			return format('Vector2.new(%s)', tuple(Value.X, Value.Y));
+		end,
+		Vector2int16 = function(Value)
+			return format('Vector2int16.new(%s)', tuple(Value.X, Value.Y));
+		end,
+		Vector3 = function(Value)
+			return format('Vector3.new(%s)', tuple(Value.X, Value.Y, Value.Z));
+		end,
+		Vector3int16 = function(Value)
+			return format('Vector3int16.new(%s)', tuple(Value.X, Value.Y, Value.Z));
+		end,
+	};
+end;
+
+tostring2 = function(Value)
+	local Type = typeof(Value);
+	if DataTypes[Type] then
+		return DataTypes[Type](Value);
+	end;
+	if Types[Type] then
+		return Types[Type](Value);
+	end;
+
+	return tostring(Value);
+end;
+
+return {tostring2, Types, DataTypes};]]></ProtectedString>
 				<int64 name="SourceAssetId">-1</int64>
 				<BinaryString name="Tags"></BinaryString>
 			</Properties>
 		</Item>
-		<Item class="ModuleScript" referent="RBXED5A5193F34C422F814141FB361FA4C5">
+		<Item class="ModuleScript" referent="RBX11D8B286DBE94B4A9510ED592CCD0EF5">
 			<Properties>
 				<BinaryString name="AttributesSerialize"></BinaryString>
 				<Content name="LinkedSource"><null></null></Content>
@@ -1079,7 +1083,7 @@ return properties]]></ProtectedString>
 				<BinaryString name="Tags"></BinaryString>
 			</Properties>
 		</Item>
-		<Item class="Script" referent="RBX0DED54F8DCB84F81B074BA272CCE80A3">
+		<Item class="Script" referent="RBXE26349601CA74EC39FC63E004F0DB526">
 			<Properties>
 				<BinaryString name="AttributesSerialize"></BinaryString>
 				<bool name="Disabled">false</bool>
@@ -1089,7 +1093,8 @@ return properties]]></ProtectedString>
 				<ProtectedString name="Source"><![CDATA[local selection = game:GetService'Selection'
 local plugin_name = script.Parent.Name
 local properties = require(script.Parent.Properties)
-local ToString = require(script.Parent.ToString).tostring
+local tostring2 = require(script.Parent.ToString)
+local ToString = tostring2[1];
 
 local Dev1 = false
 
@@ -1410,9 +1415,9 @@ end
 
 					source = source .. ([[
 coroutine.wrap(function()
-local script = %s
-%s
-%s
+	local script = %s
+	%s
+	%s
 end)()
 ]]										):format(getname(descendant), (ModuleScriptExists and requiremessage) or '', descendant.Source:gsub('\n', '\n\t'))
 					--source = source .. ('coroutine.wrap(function()\n\tlocal script = %s\nlocal oldrequire = require\nlocal require = function(value)return ___modules__scripts___[value] or oldrequire(value)end\n end)()')
@@ -1488,7 +1493,7 @@ end)]]></ProtectedString>
 				<BinaryString name="Tags"></BinaryString>
 			</Properties>
 		</Item>
-		<Item class="Frame" referent="RBX75AF0F4B3F5846CC9507A19AC955F4C2">
+		<Item class="Frame" referent="RBXB21E6F5460F14291A4888F0AFF5ED1C7">
 			<Properties>
 				<bool name="Active">false</bool>
 				<Vector2 name="AnchorPoint">
@@ -1542,7 +1547,7 @@ end)]]></ProtectedString>
 				<bool name="Visible">true</bool>
 				<int name="ZIndex">1</int>
 			</Properties>
-			<Item class="TextButton" referent="RBX5F53435065A4470BA503268A02BFC648">
+			<Item class="TextButton" referent="RBXE9D5172A32B1403C95C1E3C97578B5DE">
 				<Properties>
 					<bool name="Active">true</bool>
 					<Vector2 name="AnchorPoint">
@@ -1622,7 +1627,7 @@ end)]]></ProtectedString>
 					<bool name="Visible">true</bool>
 					<int name="ZIndex">1</int>
 				</Properties>
-				<Item class="UICorner" referent="RBXAE4BDC07D001467DBF55712DF3E3DF7A">
+				<Item class="UICorner" referent="RBX56E76F6B9939402AB86F05429F43780F">
 					<Properties>
 						<BinaryString name="AttributesSerialize"></BinaryString>
 						<UDim name="CornerRadius">
@@ -1635,7 +1640,7 @@ end)]]></ProtectedString>
 					</Properties>
 				</Item>
 			</Item>
-			<Item class="TextLabel" referent="RBX965C488C2C774F928EE5442F7B525B92">
+			<Item class="TextLabel" referent="RBX6AB160DC63974A1EB53AEFFAA543BF81">
 				<Properties>
 					<bool name="Active">false</bool>
 					<Vector2 name="AnchorPoint">
@@ -1712,7 +1717,7 @@ end)]]></ProtectedString>
 					<int name="ZIndex">1</int>
 				</Properties>
 			</Item>
-			<Item class="TextButton" referent="RBXE63EAF2B8EB34848A554FB618B4965A3">
+			<Item class="TextButton" referent="RBX595A77EA617D45C39F1195EDC9BC0502">
 				<Properties>
 					<bool name="Active">true</bool>
 					<Vector2 name="AnchorPoint">
@@ -1792,7 +1797,7 @@ end)]]></ProtectedString>
 					<bool name="Visible">true</bool>
 					<int name="ZIndex">1</int>
 				</Properties>
-				<Item class="UICorner" referent="RBX8D90B893CF244B6B90E62111553F134B">
+				<Item class="UICorner" referent="RBX729CEDA555A64AB0822D35DEB842105A">
 					<Properties>
 						<BinaryString name="AttributesSerialize"></BinaryString>
 						<UDim name="CornerRadius">
