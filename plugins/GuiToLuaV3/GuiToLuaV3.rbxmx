@@ -1,14 +1,14 @@
 <roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4">
 	<External>null</External>
 	<External>nil</External>
-	<Item class="Folder" referent="RBX782D2B92BD0B450196F44AF6B90B816A">
+	<Item class="Folder" referent="RBXC9FD3F4BD1BD49759F9A3D1B83E5E10A">
 		<Properties>
 			<BinaryString name="AttributesSerialize"></BinaryString>
 			<string name="Name">GuiToLuaV3</string>
 			<int64 name="SourceAssetId">-1</int64>
 			<BinaryString name="Tags"></BinaryString>
 		</Properties>
-		<Item class="ModuleScript" referent="RBX0E9A9DDAA47A4156B8BBB252B559373E">
+		<Item class="ModuleScript" referent="RBXA5FACBED307F46DAAA4C1B92E3BF0A42">
 			<Properties>
 				<BinaryString name="AttributesSerialize"></BinaryString>
 				<Content name="LinkedSource"><null></null></Content>
@@ -218,7 +218,7 @@ return {tostring2, Types, DataTypes};]]></ProtectedString>
 				<BinaryString name="Tags"></BinaryString>
 			</Properties>
 		</Item>
-		<Item class="ModuleScript" referent="RBX11D8B286DBE94B4A9510ED592CCD0EF5">
+		<Item class="ModuleScript" referent="RBX6F3134BED56B4B0DB096D4336A3E45C8">
 			<Properties>
 				<BinaryString name="AttributesSerialize"></BinaryString>
 				<Content name="LinkedSource"><null></null></Content>
@@ -360,6 +360,7 @@ return {tostring2, Types, DataTypes};]]></ProtectedString>
 		'ShowNativeInput',
 		'Size',
 		'SizeConstraint',
+		'TextEditable',
 		'Visible',
 		'ZIndex',
 		--behavior
@@ -1012,7 +1013,7 @@ return {tostring2, Types, DataTypes};]]></ProtectedString>
 		--behavior
 		'Archivable',
 		'BreakJointsOnDeath',
-		'RequireNeck',
+		'RequiresNeck',
 		--jump settings
 		'AutoJumpEnabled',
 		'JumpPower',
@@ -1083,12 +1084,13 @@ return properties]]></ProtectedString>
 				<BinaryString name="Tags"></BinaryString>
 			</Properties>
 		</Item>
-		<Item class="Script" referent="RBXE26349601CA74EC39FC63E004F0DB526">
+		<Item class="Script" referent="RBX20835B3CB6C0475DB0F12DC9257400C5">
 			<Properties>
 				<BinaryString name="AttributesSerialize"></BinaryString>
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">MainScript</string>
+				<token name="RunContext">0</token>
 				<string name="ScriptGuid">{CD6E9FBA-A570-480F-959E-882AEF062B4F}</string>
 				<ProtectedString name="Source"><![CDATA[local selection = game:GetService'Selection'
 local plugin_name = script.Parent.Name
@@ -1391,8 +1393,17 @@ function main()
 			for i, descendant in pairs(descendants) do
 				if descendant and descendant:IsA'ModuleScript' then
 					local name = getname(descendant)
+					
+					local requiremessage = [[
 
-					source = source .. ('___module__scripts___[%s] = (function()\n\tlocal script = %s\n\n\t%s;\nend)()\n'):format(name, name, descendant.Source:gsub('\n', '\n\t'))
+	local oldrequire = require
+	local require = function(value)
+		return ___module__scripts___[value]() or oldrequire(value)
+	end
+
+]]
+
+					source = source .. ('___module__scripts___[%s] = (function()\n\t%s\nlocal script = %s\n\n\t%s\nend)\n'):format(name, requiremessage, name, descendant.Source:gsub('\n', '\n\t'))
 				end
 			end
 		end
@@ -1406,10 +1417,10 @@ function main()
 
 					local requiremessage = [[
 
-local oldrequire = require
-local require = function(value)
-	return ___module__scripts___[value] or oldrequire(value)
-end
+	local oldrequire = require
+	local require = function(value)
+		return ___module__scripts___[value]() or oldrequire(value)
+	end
 
 ]]
 
@@ -1429,15 +1440,37 @@ end)()
 
 	for i, selected in pairs(selection:Get()) do
 		if selected:IsA'ScreenGui' then
-			local source = DoGUI(selected)
-			local script = Instance.new'LocalScript'
-			script.Parent = selected.Parent
-			script.Name = selected.Name .. ' - guitolua v3 #' .. tostring(totalscriptsmade)
+			local source = DoGUI(selected);
+			
+			--credits to Gooncreeper for fixing the script being too long issue
+			if #source < 200000 then
+				local script = Instance.new'LocalScript';
+				script.Parent = selected.Parent;
+				script.Name = selected.Name .. ' - guitolua v3 #' .. tostring(totalscriptsmade);
+				script.Source = source;
 
-			script.Source = source
+				selection:Set{script};
+				plugin:OpenScript(script);
+			else
+				print("Source is >= 200000 characters, splitting into folder");
+				local sources = Instance.new("Folder");
+				sources.Parent = selected.Parent;
+				sources.Name = selected.Name .. ' - guitolua v3 #' .. tostring(totalscriptsmade);
 
-			selection:Set{script}
-			plugin:OpenScript(script)
+				local p = 1
+				local c = 1
+				repeat
+					local a = Instance.new("Script", sources)
+					a.Source = source:sub(p,p+199998)
+					a.Name = "Source" .. c
+
+					p += 199999
+					c += 1
+				until p > #source;
+				
+				selection:Set{sources};
+			end
+			
 		elseif selected:IsA'Folder' then
 			local script = Instance.new'LocalScript'
 			script.Parent = selected.Parent
@@ -1493,7 +1526,7 @@ end)]]></ProtectedString>
 				<BinaryString name="Tags"></BinaryString>
 			</Properties>
 		</Item>
-		<Item class="Frame" referent="RBXB21E6F5460F14291A4888F0AFF5ED1C7">
+		<Item class="Frame" referent="RBX42F17BC387EB446D98B716082E5343AC">
 			<Properties>
 				<bool name="Active">false</bool>
 				<Vector2 name="AnchorPoint">
@@ -1533,7 +1566,13 @@ end)]]></ProtectedString>
 				<Ref name="RootLocalizationTable">null</Ref>
 				<float name="Rotation">0</float>
 				<bool name="Selectable">false</bool>
+				<token name="SelectionBehaviorDown">0</token>
+				<token name="SelectionBehaviorLeft">0</token>
+				<token name="SelectionBehaviorRight">0</token>
+				<token name="SelectionBehaviorUp">0</token>
+				<bool name="SelectionGroup">false</bool>
 				<Ref name="SelectionImageObject">null</Ref>
+				<int name="SelectionOrder">0</int>
 				<UDim2 name="Size">
 					<XS>0</XS>
 					<XO>291</XO>
@@ -1547,7 +1586,7 @@ end)]]></ProtectedString>
 				<bool name="Visible">true</bool>
 				<int name="ZIndex">1</int>
 			</Properties>
-			<Item class="TextButton" referent="RBXE9D5172A32B1403C95C1E3C97578B5DE">
+			<Item class="TextButton" referent="RBXDE5E00B513C043A4AB9446C921426CD0">
 				<Properties>
 					<bool name="Active">true</bool>
 					<Vector2 name="AnchorPoint">
@@ -1574,6 +1613,12 @@ end)]]></ProtectedString>
 					<bool name="ClipsDescendants">false</bool>
 					<bool name="Draggable">false</bool>
 					<token name="Font">17</token>
+					<Font name="FontFace">
+						<Family><url>rbxasset://fonts/families/GothamSSm.json</url></Family>
+						<Weight>400</Weight>
+						<Style>Normal</Style>
+						<CachedFaceId><url>rbxasset://fonts/GothamSSm-Book.otf</url></CachedFaceId>
+					</Font>
 					<int name="LayoutOrder">0</int>
 					<float name="LineHeight">1</float>
 					<int name="MaxVisibleGraphemes">-1</int>
@@ -1594,7 +1639,13 @@ end)]]></ProtectedString>
 					<float name="Rotation">0</float>
 					<bool name="Selectable">true</bool>
 					<bool name="Selected">false</bool>
+					<token name="SelectionBehaviorDown">0</token>
+					<token name="SelectionBehaviorLeft">0</token>
+					<token name="SelectionBehaviorRight">0</token>
+					<token name="SelectionBehaviorUp">0</token>
+					<bool name="SelectionGroup">false</bool>
 					<Ref name="SelectionImageObject">null</Ref>
+					<int name="SelectionOrder">0</int>
 					<UDim2 name="Size">
 						<XS>0</XS>
 						<XO>182</XO>
@@ -1627,7 +1678,7 @@ end)]]></ProtectedString>
 					<bool name="Visible">true</bool>
 					<int name="ZIndex">1</int>
 				</Properties>
-				<Item class="UICorner" referent="RBX56E76F6B9939402AB86F05429F43780F">
+				<Item class="UICorner" referent="RBX1A4391C572B94F9A90036C1530BC6241">
 					<Properties>
 						<BinaryString name="AttributesSerialize"></BinaryString>
 						<UDim name="CornerRadius">
@@ -1640,7 +1691,7 @@ end)]]></ProtectedString>
 					</Properties>
 				</Item>
 			</Item>
-			<Item class="TextLabel" referent="RBX6AB160DC63974A1EB53AEFFAA543BF81">
+			<Item class="TextLabel" referent="RBXFA8A59F97F1646859390F4A83614069E">
 				<Properties>
 					<bool name="Active">false</bool>
 					<Vector2 name="AnchorPoint">
@@ -1666,6 +1717,12 @@ end)]]></ProtectedString>
 					<bool name="ClipsDescendants">false</bool>
 					<bool name="Draggable">false</bool>
 					<token name="Font">45</token>
+					<Font name="FontFace">
+						<Family><url>rbxasset://fonts/families/Ubuntu.json</url></Family>
+						<Weight>400</Weight>
+						<Style>Normal</Style>
+						<CachedFaceId><url>rbxasset://fonts/Ubuntu-Regular.ttf</url></CachedFaceId>
+					</Font>
 					<int name="LayoutOrder">0</int>
 					<float name="LineHeight">1</float>
 					<int name="MaxVisibleGraphemes">-1</int>
@@ -1684,7 +1741,13 @@ end)]]></ProtectedString>
 					<Ref name="RootLocalizationTable">null</Ref>
 					<float name="Rotation">0</float>
 					<bool name="Selectable">false</bool>
+					<token name="SelectionBehaviorDown">0</token>
+					<token name="SelectionBehaviorLeft">0</token>
+					<token name="SelectionBehaviorRight">0</token>
+					<token name="SelectionBehaviorUp">0</token>
+					<bool name="SelectionGroup">false</bool>
 					<Ref name="SelectionImageObject">null</Ref>
+					<int name="SelectionOrder">0</int>
 					<UDim2 name="Size">
 						<XS>0</XS>
 						<XO>291</XO>
@@ -1717,7 +1780,7 @@ end)]]></ProtectedString>
 					<int name="ZIndex">1</int>
 				</Properties>
 			</Item>
-			<Item class="TextButton" referent="RBX595A77EA617D45C39F1195EDC9BC0502">
+			<Item class="TextButton" referent="RBXB8A795A6F8024D6E8286B28CE33AE4F9">
 				<Properties>
 					<bool name="Active">true</bool>
 					<Vector2 name="AnchorPoint">
@@ -1744,6 +1807,12 @@ end)]]></ProtectedString>
 					<bool name="ClipsDescendants">false</bool>
 					<bool name="Draggable">false</bool>
 					<token name="Font">17</token>
+					<Font name="FontFace">
+						<Family><url>rbxasset://fonts/families/GothamSSm.json</url></Family>
+						<Weight>400</Weight>
+						<Style>Normal</Style>
+						<CachedFaceId><url>rbxasset://fonts/GothamSSm-Book.otf</url></CachedFaceId>
+					</Font>
 					<int name="LayoutOrder">0</int>
 					<float name="LineHeight">1</float>
 					<int name="MaxVisibleGraphemes">-1</int>
@@ -1764,7 +1833,13 @@ end)]]></ProtectedString>
 					<float name="Rotation">0</float>
 					<bool name="Selectable">true</bool>
 					<bool name="Selected">false</bool>
+					<token name="SelectionBehaviorDown">0</token>
+					<token name="SelectionBehaviorLeft">0</token>
+					<token name="SelectionBehaviorRight">0</token>
+					<token name="SelectionBehaviorUp">0</token>
+					<bool name="SelectionGroup">false</bool>
 					<Ref name="SelectionImageObject">null</Ref>
+					<int name="SelectionOrder">0</int>
 					<UDim2 name="Size">
 						<XS>0</XS>
 						<XO>121</XO>
@@ -1797,7 +1872,7 @@ end)]]></ProtectedString>
 					<bool name="Visible">true</bool>
 					<int name="ZIndex">1</int>
 				</Properties>
-				<Item class="UICorner" referent="RBX729CEDA555A64AB0822D35DEB842105A">
+				<Item class="UICorner" referent="RBX2ABACD19EA1C48A9AB98D3D826DB849D">
 					<Properties>
 						<BinaryString name="AttributesSerialize"></BinaryString>
 						<UDim name="CornerRadius">
